@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary:    #1e3a5f;
+  --color-accent:     #f97316;
+  --color-success:    #16a34a;
+  --color-danger:     #dc2626;
+  --color-warning:    #f59e0b;
+  --color-background: #f3f4f6;
+  --color-surface:    #ffffff;
+  --color-text:       #111827;
+  --color-muted:      #6b7280;
+  --color-border:     #e5e7eb;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+.pp-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06);
+}
+
+.pp-section-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+}
+
+.pp-section-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 1.1em;
+  background: var(--color-accent);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.pp-table {
+  width: 100%;
+  font-size: 0.8125rem;
+  border-collapse: collapse;
+}
+
+.pp-table thead th {
+  background-color: var(--color-primary);
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 600;
+  font-size: 0.6875rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 0.5rem 0.75rem;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pp-table thead th:hover {
+  background-color: #2d5a8e;
+}
+
+.pp-table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.1s ease;
+}
+
+.pp-table tbody tr:hover {
+  filter: brightness(0.97);
+}
+
+.pp-table tbody td {
+  padding: 0.5rem 0.75rem;
+  color: var(--color-text);
+  vertical-align: middle;
+}
+
+.pp-caption {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  margin-top: 0.5rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.pp-badge-green {
+  display: inline-flex;
+  align-items: center;
+  background: #dcfce7;
+  color: #16a34a;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.pp-badge-red {
+  display: inline-flex;
+  align-items: center;
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.pp-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.1s;
+}
+
+.pp-filter-chip:hover {
+  background: #bfdbfe;
+}
