@@ -114,7 +114,7 @@ export default function MachineBreakdownTab({ events, filters }: Props) {
             <BarChart
               data={avgChartData}
               layout="vertical"
-              margin={{ top: 5, right: 60, left: 20, bottom: 5 }}
+              margin={{ top: 5, right: 60, left: 0, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
               <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={v => `${v}m`} />
@@ -122,7 +122,8 @@ export default function MachineBreakdownTab({ events, filters }: Props) {
                 type="category"
                 dataKey="machine"
                 tick={{ fontSize: 12, fontWeight: 600 }}
-                width={40}
+                width={110}
+                interval={0}
               />
               <Tooltip formatter={(v: number) => [`${v} min`, 'Avg Duration']} />
               <ReferenceLine
@@ -153,7 +154,7 @@ export default function MachineBreakdownTab({ events, filters }: Props) {
             <BarChart
               data={avgChartData}
               layout="vertical"
-              margin={{ top: 5, right: 60, left: 20, bottom: 5 }}
+              margin={{ top: 5, right: 60, left: 0, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
               <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={v => `${v}m`} />
@@ -161,7 +162,8 @@ export default function MachineBreakdownTab({ events, filters }: Props) {
                 type="category"
                 dataKey="machine"
                 tick={{ fontSize: 12, fontWeight: 600 }}
-                width={40}
+                width={110}
+                interval={0}
               />
               <Tooltip formatter={(v: number) => [`${v} min`, 'Total Above Target']} />
               <Bar dataKey="above" fill="#dc2626" fillOpacity={0.8} radius={[0, 3, 3, 0]} />

@@ -19,6 +19,36 @@ const PVC_MACHINES = ['1', '3', '4', '5', '7', '16', '18', '20']
 // Use a conservative average of ~78 hours/week scheduled
 const SCHEDULED_HOURS_PER_WEEK = 78
 
+const DEFAULT_SCHEDULE_ITEMS = [
+  'Alternating 3-day / 4-day production weeks',
+  '24 hours/day, 2 shifts',
+  'No weekend production',
+  'No Thursday/Friday on alternating weeks',
+  'Estimated scheduled hours: ~72–84 hrs/week',
+]
+
+const DEFAULT_PVC_CONTEXT_ITEMS = [
+  'PVC is ~60% of business',
+  'Team is ~20–30% more efficient vs. 2 years ago',
+  'May have more downtime than production time currently',
+  '8 machines are PVC-capable',
+]
+
+const SCHEDULE_STORAGE_KEY = 'pp_arvada_schedule_items_v1'
+const PVC_CONTEXT_STORAGE_KEY = 'pp_arvada_pvc_context_items_v1'
+
+function loadList(key: string, fallback: string[]): string[] {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return fallback
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed) && parsed.every(x => typeof x === 'string')) {
+      return parsed
+    }
+  } catch {}
+  return fallback
+}
+
 interface Props {
   events: ChangeoverEvent[]
   statsRows: StatsRow[]
@@ -27,6 +57,42 @@ interface Props {
 
 export default function PVCCapacityTab({ events, statsRows, filters }: Props) {
   const [showAllMachines, setShowAllMachines] = useState(false)
+  const [scheduleItems, setScheduleItems] = useState<string[]>(() =>
+    loadList(SCHEDULE_STORAGE_KEY, DEFAULT_SCHEDULE_ITEMS)
+  )
+  const [pvcContextItems, setPvcContextItems] = useState<string[]>(() =>
+    loadList(PVC_CONTEXT_STORAGE_KEY, DEFAULT_PVC_CONTEXT_ITEMS)
+  )
+  const [editingContext, setEditingContext] = useState(false)
+  const [draftSchedule, setDraftSchedule] = useState<string[]>(scheduleItems)
+  const [draftPvc, setDraftPvc] = useState<string[]>(pvcContextItems)
+
+  function startEditing() {
+    setDraftSchedule(scheduleItems)
+    setDraftPvc(pvcContextItems)
+    setEditingContext(true)
+  }
+
+  function cancelEditing() {
+    setEditingContext(false)
+  }
+
+  function saveEditing() {
+    const cleanedSchedule = draftSchedule.map(s => s.trim()).filter(Boolean)
+    const cleanedPvc = draftPvc.map(s => s.trim()).filter(Boolean)
+    setScheduleItems(cleanedSchedule)
+    setPvcContextItems(cleanedPvc)
+    try {
+      localStorage.setItem(SCHEDULE_STORAGE_KEY, JSON.stringify(cleanedSchedule))
+      localStorage.setItem(PVC_CONTEXT_STORAGE_KEY, JSON.stringify(cleanedPvc))
+    } catch {}
+    setEditingContext(false)
+  }
+
+  function resetToDefaults() {
+    setDraftSchedule(DEFAULT_SCHEDULE_ITEMS)
+    setDraftPvc(DEFAULT_PVC_CONTEXT_ITEMS)
+  }
 
   const machinesToShow = showAllMachines
     ? [...new Set(events.map(e => e.machine))].sort(
@@ -132,30 +198,70 @@ export default function PVCCapacityTab({ events, statsRows, filters }: Props) {
 
       {/* Context callout */}
       <div className="pp-card p-5" style={{ borderLeft: '4px solid #f97316' }}>
-        <div className="pp-section-title">Portland Plant Operating Context</div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="pp-section-title mb-0">Arvada, CO Plant Operating Context</div>
+          {!editingContext ? (
+            <button
+              onClick={startEditing}
+              className="text-xs px-3 py-1 rounded border"
+              style={{ borderColor: '#e5e7eb', color: '#374151', background: '#f9fafb' }}
+            >
+              Edit
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={resetToDefaults}
+                className="text-xs px-3 py-1 rounded border"
+                style={{ borderColor: '#e5e7eb', color: '#6b7280', background: '#f9fafb' }}
+              >
+                Reset to Defaults
+              </button>
+              <button
+                onClick={cancelEditing}
+                className="text-xs px-3 py-1 rounded border"
+                style={{ borderColor: '#e5e7eb', color: '#6b7280', background: '#f9fafb' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveEditing}
+                className="text-xs px-3 py-1 rounded text-white"
+                style={{ background: '#1e3a5f' }}
+              >
+                Save
+              </button>
+            </div>
+          )}
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
             <div className="font-semibold mb-1" style={{ color: '#374151' }}>
               Current Production Schedule
             </div>
-            <ul className="space-y-1" style={{ color: '#6b7280' }}>
-              <li>• Alternating 3-day / 4-day production weeks</li>
-              <li>• 24 hours/day, 2 shifts</li>
-              <li>• No weekend production</li>
-              <li>• No Thursday/Friday on alternating weeks</li>
-              <li>• Estimated scheduled hours: ~72–84 hrs/week</li>
-            </ul>
+            {!editingContext ? (
+              <ul className="space-y-1" style={{ color: '#6b7280' }}>
+                {scheduleItems.map((item, i) => (
+                  <li key={i}>• {item}</li>
+                ))}
+              </ul>
+            ) : (
+              <EditableList items={draftSchedule} onChange={setDraftSchedule} />
+            )}
           </div>
           <div>
             <div className="font-semibold mb-1" style={{ color: '#374151' }}>
               PVC Context
             </div>
-            <ul className="space-y-1" style={{ color: '#6b7280' }}>
-              <li>• PVC is ~60% of business</li>
-              <li>• Team is ~20–30% more efficient vs. 2 years ago</li>
-              <li>• May have more downtime than production time currently</li>
-              <li>• 8 machines are PVC-capable</li>
-            </ul>
+            {!editingContext ? (
+              <ul className="space-y-1" style={{ color: '#6b7280' }}>
+                {pvcContextItems.map((item, i) => (
+                  <li key={i}>• {item}</li>
+                ))}
+              </ul>
+            ) : (
+              <EditableList items={draftPvc} onChange={setDraftPvc} />
+            )}
           </div>
         </div>
       </div>
@@ -336,6 +442,59 @@ export default function PVCCapacityTab({ events, statsRows, filters }: Props) {
         Available time does not automatically equal sellable production — quality, demand, raw material, and staffing all factor in.
       </div>
 
+    </div>
+  )
+}
+
+interface EditableListProps {
+  items: string[]
+  onChange: (items: string[]) => void
+}
+
+function EditableList({ items, onChange }: EditableListProps) {
+  function updateItem(index: number, value: string) {
+    const next = [...items]
+    next[index] = value
+    onChange(next)
+  }
+
+  function removeItem(index: number) {
+    onChange(items.filter((_, i) => i !== index))
+  }
+
+  function addItem() {
+    onChange([...items, ''])
+  }
+
+  return (
+    <div className="space-y-1.5">
+      {items.map((item, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <span style={{ color: '#9ca3af' }}>•</span>
+          <input
+            type="text"
+            value={item}
+            onChange={e => updateItem(i, e.target.value)}
+            className="flex-1 px-2 py-1 text-sm rounded border"
+            style={{ borderColor: '#d1d5db', color: '#374151' }}
+          />
+          <button
+            onClick={() => removeItem(i)}
+            className="text-xs px-2 py-1 rounded border"
+            style={{ borderColor: '#fecaca', color: '#dc2626', background: '#fef2f2' }}
+            aria-label="Remove item"
+          >
+            ×
+          </button>
+        </div>
+      ))}
+      <button
+        onClick={addItem}
+        className="text-xs px-2 py-1 rounded border mt-1"
+        style={{ borderColor: '#bfdbfe', color: '#1e3a5f', background: '#eff6ff' }}
+      >
+        + Add line
+      </button>
     </div>
   )
 }
